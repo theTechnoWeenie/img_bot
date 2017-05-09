@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/theTechnoWeenie/img_bot#readme",
   "dependencies": {
+    "async": "^2.4.0",
+    "bluebird": "^3.5.0",
     "request": "^2.81.0"
   }
 }

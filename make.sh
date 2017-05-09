@@ -2,7 +2,7 @@
 
 function build() {
   echo "Building application"
-
+  npm install
 }
 
 action=$1
