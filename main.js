@@ -1,9 +1,16 @@
-const http = require('http')
-const default_resp = require('./default_resp.json')
+const http = require('http'),
+      req = require('request'),
+      Promise = require('bluebird'),
+      default_resp = require('./default_resp.json')
+      imgur = require('./sources/imgur.js')
+      async = require('async')
+
 var port = 3000
 if (process.argv.length > 2) {
   port = process.argv[2]
 }
+
+var sources = initSources()
 
 const requestHandler = function (request, response) {
   if(request.method == "POST") {
@@ -17,50 +24,20 @@ const requestHandler = function (request, response) {
       console.log(contents.text)
       console.log(decodeURIComponent(contents.response_url))
       var fullUrl = decodeURIComponent(contents.response_url)
-      setTimeout(function(){
-        var postBody = JSON.stringify(picResponse())
-        console.log(postBody)
-        var contentLength = Buffer.byteLength(postBody)
-        var path = fullUrl.split("hooks.slack.com")
-        var option = {
-          host: "https://hooks.slack.com",
-          port: 443,
-          path: path[1],
-          method : 'POST',
-          headers : {
-            'Content-Type': 'application/json',
-            'Content-Length': contentLength
+      picResponse(decodeURIComponent(contents.text)).then(function(pic){
+        req.post(fullUrl, {body:pic, json:true},function(err,httpResponse,body){
+          if(err || httpResponse.statusCode >= 300){
+            console.log("Errors:")
+            console.log(err)
+            console.log(httpResponse.statusCode)
+            console.log(body)
           }
-        }
-        console.log(option)
-        var postReq = http.request(option, function(res){
-          console.log("Status from sending pic: ")
-          console.log(res.statusCode)
         })
-      }, 1000)
+      })
     })
   }
   response.setHeader('content-type', 'application/json');
   response.end(JSON.stringify(default_resp))
-}
-
-function getContents(body) {
-  var parts = body.split('&')
-  var contents = {}
-  parts.forEach(function(item) {
-    var pair = item.split("=")
-    contents[pair[0]] = pair[1]
-  }, this);
-  return contents
-}
-
-function picResponse() {
-  var pic = "http://i.imgur.com/hr3SX1Z.png"
-  var response = {
-    "response_type": "in_channel",
-    "text":pic
-  }
-  return response
 }
 
 const server = http.createServer(requestHandler)
@@ -73,4 +50,58 @@ server.listen(port, function (err) {
   console.log('server is listening on', port)
 })
 
-//http://104.197.219.228:8080
+function getContents(body) {
+  var parts = body.split('&')
+  var contents = {}
+  parts.forEach(function(item) {
+    var pair = item.split("=")
+    contents[pair[0]] = pair[1]
+  }, this);
+  return contents
+}
+
+function picResponse(terms_concat) {
+  var terms = terms_concat.split('+')
+  var totalPics = 1
+  if (terms.length > 0 && !isNaN(Number(terms[0]))){
+    totalPics = terms.shift()
+    console.log("Grabbing ", totalPics, "for terms ", terms)
+  }
+  console.log("Searching based on terms: ", terms)
+  return getOptions(terms).then(function(options){
+    var pic = selectRandom(options)
+    var response = {
+      "response_type": "in_channel",
+      "text":pic
+    }
+    return response
+  })
+}
+
+function getOptions(terms){
+  return new Promise(function(resolve, reject){
+    async.concat(sources, function(source, callback){
+      source.search(terms).then(function(results){
+        callback(null, results)
+      })
+    }, function(err, results){
+      console.log("Found ", results.length, " results from ", sources.length, " sources")
+      if(err) {
+        console.log("Error getting images from sources:", err)
+        return reject(err)
+      }
+      resolve(results)
+    })
+  })
+}
+
+function initSources(){
+  return [new imgur.Imgur()]
+}
+
+function selectRandom(options){
+  var total = options.length
+  var optionIndex = Math.floor(Math.random() * total)
+  console.log("Index: ", optionIndex)
+  return options[optionIndex]
+}
