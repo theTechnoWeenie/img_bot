@@ -1,5 +1,9 @@
 FROM mhart/alpine-node:latest
-run mkdir /app
-add main.js /app/main.js
-expose 3000
-cmd node /app/main.js
+RUN mkdir /app
+RUN mkdir /app/sources
+ADD main.js /app/main.js
+ADD *.json /app/
+ADD sources /app/sources/
+RUN cd /app/ && npm install
+EXPOSE 3000
+CMD node /app/main.js
