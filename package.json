@@ -1,0 +1,22 @@
+{
+  "name": "img_bot",
+  "version": "1.0.0",
+  "description": "slack bot to get static images",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theTechnoWeenie/img_bot.git"
+  },
+  "author": "sjantz0@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/theTechnoWeenie/img_bot/issues"
+  },
+  "homepage": "https://github.com/theTechnoWeenie/img_bot#readme",
+  "dependencies": {
+    "request": "^2.81.0"
+  }
+}
