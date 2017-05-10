@@ -13,7 +13,7 @@ if (process.argv.length > 2) {
 var sources = initSources()
 
 const requestHandler = function (request, response) {
-  console.log(request.method, " on ", request.url)
+  console.log(request.method, " on ", request.url, " from ", request.connection.remoteAddress)
   if(request.method == "POST") {
     var body = "";
     request.on('data', function (chunk) {
