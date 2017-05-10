@@ -65,7 +65,6 @@ function picResponse(terms_concat) {
     totalPics = terms.shift()
     console.log("Grabbing ", totalPics, "for terms ", terms)
   }
-  console.log("Searching based on terms: ", terms)
   return getOptions(terms).then(function(options){
     var pic = selectRandom(options)
     var response = {
