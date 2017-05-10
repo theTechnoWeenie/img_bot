@@ -14,20 +14,18 @@ var sources = initSources()
 
 const requestHandler = function (request, response) {
   if(request.method == "POST") {
-    console.log("POST received to ", request.url)
+    console.log("POST on ", request.url)
     var body = "";
     request.on('data', function (chunk) {
       body += chunk;
     });
     request.on('end', function () {
       var contents = getContents(body)
-      console.log(contents.text)
-      console.log(decodeURIComponent(contents.response_url))
       var fullUrl = decodeURIComponent(contents.response_url)
       picResponse(decodeURIComponent(contents.text)).then(function(pic){
         req.post(fullUrl, {body:pic, json:true},function(err,httpResponse,body){
           if(err || httpResponse.statusCode >= 300){
-            console.log("Errors:")
+            console.log("Errors replying:")
             console.log(err)
             console.log(httpResponse.statusCode)
             console.log(body)
@@ -85,7 +83,6 @@ function getOptions(terms){
         callback(null, results)
       })
     }, function(err, results){
-      console.log("Found ", results.length, " results from ", sources.length, " sources")
       if(err) {
         console.log("Error getting images from sources:", err)
         return reject(err)
@@ -95,13 +92,12 @@ function getOptions(terms){
   })
 }
 
-function initSources(){
+function initSources(){ 
   return [new imgur.Imgur()]
 }
 
 function selectRandom(options){
   var total = options.length
   var optionIndex = Math.floor(Math.random() * total)
-  console.log("Index: ", optionIndex)
   return options[optionIndex]
 }
