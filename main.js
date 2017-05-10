@@ -14,7 +14,6 @@ var sources = initSources()
 
 const requestHandler = function (request, response) {
   if(request.method == "POST") {
-    console.log("POST on ", request.url)
     var body = "";
     request.on('data', function (chunk) {
       body += chunk;
