@@ -17,11 +17,12 @@ case "$action" in
     node main.js
     ;;
   docker)
-    if [ -z $2 ]; then
-      echo "Must supply a version!"
-      exit 1
+    version=$2
+    if [ -z $version ]; then
+      echo "No version supplied, using built in"
+      version=`cat version.txt`
     fi
-    docker build -t img_bot:$2 .
+    docker build -t img_bot:$version .
     ;;
   docker-run)
     if [ -z $2 ]; then
