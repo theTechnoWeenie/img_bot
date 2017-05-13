@@ -22,7 +22,7 @@ function Imgur(){
             var imageOptions = self.getOptions(self.image_url, [imgHash])
             return rp(imageOptions).then(function(imageData){
                 imageData = JSON.parse(imageData)
-                return [imageData.data.link]
+                return [{"source": "imgur","pic":imageData.data.link}]
             })
         })
     }

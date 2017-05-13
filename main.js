@@ -1,9 +1,12 @@
 const http = require('http'),
       req = require('request'),
       Promise = require('bluebird'),
-      default_resp = require('./default_resp.json')
-      imgur = require('./sources/imgur.js')
-      async = require('async')
+      default_resp = require('./default_resp.json'),
+      imgur = require('./sources/imgur.js'),
+      giphy = require('./sources/giphy.js'),
+      async = require('async'),
+      path = require('path'),
+      fs = require('fs')
 
 var port = 3000
 if (process.argv.length > 2) {
@@ -22,7 +25,7 @@ const requestHandler = function (request, response) {
     request.on('end', function () {
       var contents = getContents(body)
       var fullUrl = decodeURIComponent(contents.response_url)
-      picResponse(decodeURIComponent(contents.text)).then(function(pic){
+      picResponse(decodeURIComponent(contents.text), request).then(function(pic){
         req.post(fullUrl, {body:pic, json:true},function(err,httpResponse,body){
           if(err || httpResponse.statusCode >= 300){
             console.log("Errors replying:")
@@ -33,6 +36,9 @@ const requestHandler = function (request, response) {
         })
       })
     })
+  }
+  if(request.url.includes("/images/")) {
+    return sendStaticImages(response, request)
   }
   response.setHeader('content-type', 'application/json');
   response.end(JSON.stringify(default_resp))
@@ -58,7 +64,8 @@ function getContents(body) {
   return contents
 }
 
-function picResponse(terms_concat) {
+//NOTE: the request object is here because we need to attribute giphy images... kinda dirty.
+function picResponse(terms_concat, request) {
   var terms = terms_concat.split('+')
   var totalPics = 1
   if (terms.length > 0 && !isNaN(Number(terms[0]))){
@@ -66,10 +73,19 @@ function picResponse(terms_concat) {
     console.log("Grabbing ", totalPics, "for terms ", terms)
   }
   return getOptions(terms).then(function(options){
-    var pic = selectRandom(options)
+    var picData = selectRandom(options)
+    var pic = picData.pic
     var response = {
       "response_type": "in_channel",
-      "text":pic
+      "text":picData.pic
+    }
+    if(picData.source == "giphy"){
+      response.attachments = [
+        {
+          "fallback":"Powered by " + picData.source,
+          "image_url": "http://" + request.headers.host + "/images/poweredByGiphy.png"          
+        }
+      ] 
     }
     return response
   })
@@ -92,11 +108,26 @@ function getOptions(terms){
 }
 
 function initSources(){ 
-  return [new imgur.Imgur()]
+  return [new imgur.Imgur(), new giphy.Giphy()]
 }
 
 function selectRandom(options){
   var total = options.length
   var optionIndex = Math.floor(Math.random() * total)
   return options[optionIndex]
+}
+
+function sendStaticImages(response, request) {
+  response.statusCode = 200
+  var fileLoc = path.resolve("./")
+  fileLoc = path.join(fileLoc, request.url)
+  return fs.readFile(fileLoc, function(err, data){
+    if(err) {
+      res.writeHead(404, 'Not Found');
+      res.write('404: File Not Found!');
+      return res.end();
+    }
+    response.write(data)
+    return response.end();
+  })
 }
