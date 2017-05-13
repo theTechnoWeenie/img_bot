@@ -39,7 +39,7 @@ const requestHandler = function (request, response) {
   if(request.url.includes("/images/")) {
     return sendStaticImages(response, request)
   }
-  console.log(request.method, " on ", request.url)
+  console.log(request.method, " on ", request.url, " from ", request.connection.remoteAddress)
   response.setHeader('content-type', 'application/json');
   response.end(JSON.stringify(default_resp))
 }
