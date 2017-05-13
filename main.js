@@ -16,7 +16,6 @@ if (process.argv.length > 2) {
 var sources = initSources()
 
 const requestHandler = function (request, response) {
-  console.log(request.method, " on ", request.url)
   if(request.method == "POST") {
     var body = "";
     request.on('data', function (chunk) {
@@ -40,6 +39,7 @@ const requestHandler = function (request, response) {
   if(request.url.includes("/images/")) {
     return sendStaticImages(response, request)
   }
+  console.log(request.method, " on ", request.url)
   response.setHeader('content-type', 'application/json');
   response.end(JSON.stringify(default_resp))
 }
@@ -67,11 +67,6 @@ function getContents(body) {
 //NOTE: the request object is here because we need to attribute giphy images... kinda dirty.
 function picResponse(terms_concat, request) {
   var terms = terms_concat.split('+')
-  var totalPics = 1
-  if (terms.length > 0 && !isNaN(Number(terms[0]))){
-    totalPics = terms.shift()
-    console.log("Grabbing ", totalPics, "for terms ", terms)
-  }
   return getOptions(terms).then(function(options){
     var picData = selectRandom(options)
     var pic = picData.pic
