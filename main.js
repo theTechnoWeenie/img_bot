@@ -118,9 +118,9 @@ function sendStaticImages(response, request) {
   fileLoc = path.join(fileLoc, request.url)
   return fs.readFile(fileLoc, function(err, data){
     if(err) {
-      res.writeHead(404, 'Not Found');
-      res.write('404: File Not Found!');
-      return res.end();
+      response.writeHead(404, 'Not Found');
+      response.write('404: File Not Found!');
+      return response.end();
     }
     response.write(data)
     return response.end();
