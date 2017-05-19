@@ -22,11 +22,15 @@ function Imgur(){
             var imageOptions = self.getOptions(self.image_url, [imgHash])
             return rp(imageOptions).then(function(imageData){
                 imageData = JSON.parse(imageData)
+                if(!imageData.data.link) {
+                  console.log("Image data:")
+                  console.log(imageData.data)
+                }
                 return [{"source": "imgur","pic":imageData.data.link}]
             })
         })
     }
-    
+
     this.getOptions = function(url, tokens){
         return {
             method: "GET",
