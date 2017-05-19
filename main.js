@@ -27,10 +27,14 @@ const requestHandler = function (request, response) {
       picResponse(decodeURIComponent(contents.text), request).then(function(pic){
         req.post(fullUrl, {body:pic, json:true, maxAttempts: 5 },function(err,httpResponse,body){
           if(err || httpResponse.statusCode >= 300){
+            console.log('----')
             console.log("Errors replying:")
+            console.log("Pic: ", pic)
+            console.log("Reply URL: ", fullUrl)
             console.log(err)
             console.log(httpResponse.statusCode)
             console.log(body)
+            console.log('----')
           }
         })
       })
