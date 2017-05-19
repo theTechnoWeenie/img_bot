@@ -1,5 +1,5 @@
 const http = require('http'),
-      req = require('request'),
+      req = require('requestretry'),
       Promise = require('bluebird'),
       default_resp = require('./default_resp.json'),
       imgur = require('./sources/imgur.js'),
@@ -25,7 +25,7 @@ const requestHandler = function (request, response) {
       var contents = getContents(body)
       var fullUrl = decodeURIComponent(contents.response_url)
       picResponse(decodeURIComponent(contents.text), request).then(function(pic){
-        req.post(fullUrl, {body:pic, json:true},function(err,httpResponse,body){
+        req.post(fullUrl, {body:pic, json:true, maxAttempts: 5 },function(err,httpResponse,body){
           if(err || httpResponse.statusCode >= 300){
             console.log("Errors replying:")
             console.log(err)
@@ -78,9 +78,9 @@ function picResponse(terms_concat, request) {
       response.attachments = [
         {
           "fallback":"Powered by " + picData.source,
-          "image_url": "http://" + request.headers.host + "/images/poweredByGiphy.png"          
+          "image_url": "http://" + request.headers.host + "/images/poweredByGiphy.png"
         }
-      ] 
+      ]
     }
     return response
   })
@@ -102,7 +102,7 @@ function getOptions(terms){
   })
 }
 
-function initSources(){ 
+function initSources(){
   return [new imgur.Imgur(), new giphy.Giphy()]
 }
 
