@@ -15,6 +15,10 @@ function Giphy() {
         }
         return rp(options).then(function(response){
             var imgData = JSON.parse(response)
+            if(!imgData.data.images.fixed_height.url){
+              console.log("Image link is undefined!")
+              console.log(imageData)
+            }
             return [{"source":"giphy", "pic": imgData.data.images.fixed_height.url}]
         })
     }
