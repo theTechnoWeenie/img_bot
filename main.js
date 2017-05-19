@@ -8,6 +8,7 @@ const http = require('http'),
       path = require('path'),
       fs = require('fs')
 
+var DEBUG = process.env.DEBUG == "true" || false
 var port = 3000
 if (process.argv.length > 2) {
   port = process.argv[2]
@@ -72,13 +73,17 @@ function getContents(body) {
 function picResponse(terms_concat, request) {
   var terms = terms_concat.split('+')
   return getOptions(terms).then(function(options){
+    debug("Got " + options.length + " Options")
     var picData = selectRandom(options)
+    debug("Selected: " + JSON.stringify(picData))
     var pic = picData.pic
     var response = {
       "response_type": "in_channel",
       "text":picData.pic
     }
+    debug("Response data: " + JSON.stringify(response))
     if(picData.source == "giphy"){
+      debug("From giphy")
       response.attachments = [
         {
           "fallback":"Powered by " + picData.source,
@@ -113,6 +118,7 @@ function initSources(){
 function selectRandom(options){
   var total = options.length
   var optionIndex = Math.floor(Math.random() * total)
+  debug("Choosing index: " + optionIndex + " of Total: " + total)
   return options[optionIndex]
 }
 
@@ -129,4 +135,10 @@ function sendStaticImages(response, request) {
     response.write(data)
     return response.end();
   })
+}
+
+function debug(msg) {
+  if(DEBUG){
+    console.log(msg)
+  }
 }
