@@ -20,6 +20,9 @@ function Giphy() {
               console.log(imageData)
             }
             return [{"source":"giphy", "pic": imgData.data.images.fixed_height.url}]
+        }, function(err){
+          console.log("Error in giphy: ", err)
+          return []
         })
     }
 }

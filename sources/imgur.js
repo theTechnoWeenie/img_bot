@@ -16,7 +16,7 @@ function Imgur(){
                 return datum.nsfw === false
             })
             if(filtered.length == 0) {
-                return ["http://i.imgur.com/4AjVHdR.png"]
+                return []
             }
             var imgHash = filtered[0].cover || filtered[0].id
             var imageOptions = self.getOptions(self.image_url, [imgHash])

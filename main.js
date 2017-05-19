@@ -117,6 +117,9 @@ function initSources(){
 
 function selectRandom(options){
   var total = options.length
+  if(total == 0){
+    return [{"source": "whoops","pic":imageData.data.link}]
+  }
   var optionIndex = Math.floor(Math.random() * total)
   debug("Choosing index: " + optionIndex + " of Total: " + total)
   return options[optionIndex]
