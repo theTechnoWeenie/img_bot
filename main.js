@@ -82,15 +82,21 @@ function picResponse(terms_concat, request) {
       "text":picData.pic
     }
     debug("Response data: " + JSON.stringify(response))
+    var attach = {};
     if(picData.source == "giphy"){
       debug("From giphy")
-      response.attachments = [
-        {
-          "fallback":"Powered by " + picData.source,
-          "image_url": "http://" + request.headers.host + "/images/poweredByGiphy.png"
-        }
-      ]
+      attach = {
+        "fallback":"Powered by " + picData.source,
+        "image_url": "http://" + request.headers.host + "/images/poweredByGiphy.png"
+      }
+    } else if(picData.source == "imgur") {
+      attach = {
+        "fallback":"Don't relly know what this is.",
+        "color":"#85bf25",
+        "text":picData.post
+      }
     }
+    response.attachments = [attach]
     return response
   })
 }
@@ -100,6 +106,10 @@ function getOptions(terms){
     async.concat(sources, function(source, callback){
       source.search(terms).then(function(results){
         callback(null, results)
+      }).catch(function(error) {
+        console.log(error)
+        console.log('Source: ', source.name, ' had a problem with terms: ', terms)
+        callback(null, [])
       })
     }, function(err, results){
       if(err) {
@@ -112,13 +122,16 @@ function getOptions(terms){
 }
 
 function initSources(){
-  return [new imgur.Imgur(), new giphy.Giphy()]
+  return [
+    new imgur.Imgur(),
+    new giphy.Giphy(),
+  ]
 }
 
 function selectRandom(options){
   var total = options.length
   if(total == 0){
-    return [{"source": "whoops","pic":imageData.data.link}]
+    return {"source":"static", "pic": "http://i.imgur.com/4AjVHdR.png"}
   }
   var optionIndex = Math.floor(Math.random() * total)
   debug("Choosing index: " + optionIndex + " of Total: " + total)

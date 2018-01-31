@@ -2,6 +2,7 @@ var secrets = require("../.secrets.json"),
     rp = require('request-promise')
 
 function Giphy() {
+    this.name = "Giphy"
     this.api_key = secrets.giphyKey
     this.url = "http://api.giphy.com/v1/gifs/translate"
 
