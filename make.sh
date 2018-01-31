@@ -19,8 +19,8 @@ case "$action" in
   docker)
     version=$2
     if [ -z $version ]; then
-      echo "No version supplied, using built in"
       version=`cat version.txt`
+      echo "No version supplied, using built in $version"
     fi
     docker build -t img_bot:$version .
     ;;
